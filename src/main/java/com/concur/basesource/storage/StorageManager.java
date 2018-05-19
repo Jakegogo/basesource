@@ -69,7 +69,7 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 			throw new RuntimeException(message.getMessage());
 		}
 
-		logger.warn("正在加载静态资源文件:{}:{}", clz.getSimpleName(), definition.getLocation());
+		logger.warn("正在重新加载静态资源文件:{}:{}", clz.getSimpleName(), definition.getLocation());
 		Storage<?, ?> storage = getStorage(clz);
 		storage.reload();
 	}
@@ -91,17 +91,22 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 		}
 
 		/** 文件更新监视器 */
-		fileAlterationMonitor = new FileAlterationMonitor(3 * 1000);
+		this.fileAlterationMonitor = new FileAlterationMonitor(3 * 1000);
+		try {
+			this.fileAlterationMonitor.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		// 清理文件监听器
-		for (FileAlterationObserver observer : fileAlterationMonitor.getObservers()) {
-			fileAlterationMonitor.removeObserver(observer);
+		for (FileAlterationObserver observer : this.fileAlterationMonitor.getObservers()) {
+			this.fileAlterationMonitor.removeObserver(observer);
 		}
 
 		FileAlterationObserver observer = new FileAlterationObserver(path, false);
-		this.fileAlterationMonitor.addObserver(observer);
-		observer.addListener(this);
 		try {
 			observer.initialize();
+			this.fileAlterationMonitor.addObserver(observer);
+			observer.addListener(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
