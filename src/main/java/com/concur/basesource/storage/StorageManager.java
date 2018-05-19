@@ -215,12 +215,16 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 
 	@Override
 	public void onFileCreate(File file) {
-
+		logger.warn("监听到添加静态资源文件:{}", file.getName());
+		Class<?> cls = resourceMap.get(file.getAbsolutePath());
+		if (cls != null) {
+			this.reload(cls);
+		}
 	}
 
 	@Override
 	public void onFileChange(File file) {
-		logger.warn("监听到静态资源文件更改:{}", file.getName());
+		logger.warn("监听到更改静态资源文件:{}", file.getName());
 		Class<?> cls = resourceMap.get(file.getAbsolutePath());
 		if (cls != null) {
 			this.reload(cls);
