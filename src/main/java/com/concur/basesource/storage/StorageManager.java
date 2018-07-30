@@ -49,7 +49,7 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 	public void initialize(ResourceDefinition definition) {
 		Class<?> clz = definition.getClz();
 		if (definitions.putIfAbsent(clz.getName(), definition) != null) {
-			ResourceDefinition prev = definitions.get(clz);
+			ResourceDefinition prev = definitions.get(clz.getName());
 			FormattingTuple message = MessageFormatter.format("类[{}]的资源定义[{}]已经存在", clz, prev);
 			logger.error(message.getMessage());
 			throw new RuntimeException(message.getMessage());
@@ -61,7 +61,7 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 	 * @param clz 要重新加载的类资源
 	 */
 	public void reload(Class<?> clz) {
-		ResourceDefinition definition = definitions.get(clz);
+		ResourceDefinition definition = definitions.get(clz.getName());
 		if (definition == null) {
 			FormattingTuple message = MessageFormatter.format("类[{}]的资源定义不存在", clz);
 			logger.error(message.getMessage());
