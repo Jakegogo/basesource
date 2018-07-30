@@ -30,8 +30,8 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 	private static final Logger logger = LoggerFactory.getLogger(StorageManager.class);
 	
 	/** 静态类资源定义 */
-	private ConcurrentHashMap<Class, ResourceDefinition> definitions = 
-		new ConcurrentHashMap<Class, ResourceDefinition>();
+	private ConcurrentHashMap<String, ResourceDefinition> definitions =
+		new ConcurrentHashMap<String, ResourceDefinition>();
 	/** 资源存储空间 */
 	private ConcurrentHashMap<Class<?>, Storage<?, ?>> storages = 
 		new ConcurrentHashMap<Class<?>, Storage<?,?>>();
@@ -48,13 +48,12 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 	 */
 	public void initialize(ResourceDefinition definition) {
 		Class<?> clz = definition.getClz();
-		if (definitions.putIfAbsent(clz, definition) != null) {
+		if (definitions.putIfAbsent(clz.getName(), definition) != null) {
 			ResourceDefinition prev = definitions.get(clz);
 			FormattingTuple message = MessageFormatter.format("类[{}]的资源定义[{}]已经存在", clz, prev);
 			logger.error(message.getMessage());
 			throw new RuntimeException(message.getMessage());
 		}
-		initializeStorage(clz);
 	}
 	
 	/**
@@ -148,7 +147,7 @@ public class StorageManager implements ApplicationContextAware, FileAlterationLi
 	 * @return
 	 */
 	private Storage initializeStorage(Class clz) {
-		ResourceDefinition definition = this.definitions.get(clz);
+		ResourceDefinition definition = this.definitions.get(clz.getName());
 		if (definition == null) {
 			FormattingTuple message = MessageFormatter.format("静态资源[{}]的信息定义不存在，可能是配置缺失", clz.getSimpleName());
 			logger.error(message.getMessage());
